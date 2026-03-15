@@ -1,0 +1,67 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  --background: #fafafa;
+  --foreground: #1a1a2e;
+  --accent: #3f3f46;
+  --accent-light: #f4f4f5;
+  --gray-border: #d4d4d8;
+  --gray-light: #f4f4f5;
+  --gray-text: #71717a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+/* Pixel-style border utility */
+.border-pixel {
+  border: 2px solid var(--gray-border);
+  box-shadow:
+    2px 2px 0 0 var(--gray-border);
+}
+
+/* Pixel button style */
+.btn-pixel {
+  border: 2px solid var(--foreground);
+  box-shadow: 2px 2px 0 0 var(--foreground);
+  transition: all 0.1s;
+}
+
+.btn-pixel:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 0 var(--foreground);
+}
+
+.btn-pixel:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.btn-pixel-accent {
+  border: 2px solid var(--foreground);
+  box-shadow: 2px 2px 0 0 var(--foreground);
+  transition: all 0.1s;
+}
+
+.btn-pixel-accent:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 0 var(--foreground);
+}
+
+.btn-pixel-accent:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
