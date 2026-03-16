@@ -80,13 +80,13 @@ User: "What is 12 + 34?"
 Browser ──POST──▶ /api/chat { messages, walletBalance }
                       │
                       ▼
-                 Z.AI (GLM-4.7)
+                 LLM
                  decides: call add_numbers(a=12, b=34)
                       │
                  execute() runs server-side
                  result: { result: 46 }
                       │
-                 GLM-4.7: "12 + 34 = 46"
+                 LLM: "12 + 34 = 46"
                       │
     ◀──stream──────────┘
     │
@@ -117,7 +117,7 @@ User: "What is 7 squared?"
 Browser ──POST──▶ /api/chat { messages, walletBalance: "$20.00" }
                       │
                       ▼
-                 Z.AI (GLM-4.7)
+                 LLM
                  decides: call square_number(n=7)
                  ⚠ NO execute() function on server
                       │
@@ -259,7 +259,7 @@ System prompt includes:
    Do NOT call paid tools."
     │
     ▼
-GLM-4.7 responds:
+LLM responds:
   "I'd need to use square_number which costs $0.01 USDC,
    but your wallet isn't funded. Click the Fund button
    on the right panel to get free testnet USDC."
@@ -276,7 +276,7 @@ No payment attempted. No error.
 │   BROWSER    │     │  NEXT.JS     │     │   EXTERNAL      │
 │              │     │  SERVER      │     │   SERVICES      │
 │              │     │              │     │                 │
-│ Chat UI ─────┼──1──▶ /api/chat ───┼──2──▶ Z.AI GLM-4.7   │
+│ Chat UI ─────┼──1──▶ /api/chat ───┼──2──▶ LLM            │
 │  useChat()   ◀──3──┤  streamText()◀──3──┤  tool decision  │
 │              │     │              │     │                 │
 │ ERC-8128 ────┤     │              │     │                 │
@@ -297,7 +297,7 @@ No payment attempted. No error.
 └──────────────┘     └──────────────┘     └─────────────────┘
 
 1. User sends chat message (+ wallet balance)
-2. Server forwards to Z.AI LLM
+2. Server forwards to LLM
 3. LLM streams response + tool calls (paid tools have no execute)
 4. Browser signs request with ERC-8128, calls paid tool endpoint
 5. Server returns 402; browser signs USDC auth + retries with identity + payment
@@ -312,7 +312,7 @@ No payment attempted. No error.
 ## Sequence Diagram — Paid Tool (x402 Payment)
 
 ```
- User          Browser           /api/chat        Z.AI (GLM-4.7)      /api/tools/*      x402 Facilitator    Base Sepolia
+ User          Browser           /api/chat        LLM                 /api/tools/*      x402 Facilitator    Base Sepolia
   │               │                  │                  │                  │                  │                  │
   │  "What is     │                  │                  │                  │                  │                  │
   │  7 squared?"  │                  │                  │                  │                  │                  │
@@ -437,7 +437,7 @@ No payment attempted. No error.
 ## Sequence Diagram — Free Tool (No Payment)
 
 ```
- User          Browser           /api/chat        Z.AI (GLM-4.7)
+ User          Browser           /api/chat        LLM
   │               │                  │                  │
   │  "What is     │                  │                  │
   │  2 + 3?"      │                  │                  │
@@ -479,7 +479,7 @@ No payment attempted. No error.
 | Stage | What Happens | Where |
 |-------|-------------|-------|
 | **Init** | Wallet generated, balances fetched | Browser (localStorage + viem) |
-| **Chat** | Message sent to LLM (+ wallet balance), tool decision made | Server (/api/chat → Z.AI) |
+| **Chat** | Message sent to LLM (+ wallet balance), tool decision made | Server (/api/chat → LLM) |
 | **Free tool** | Executes immediately, streams result | Server (execute() in route) |
 | **Paid tool** | Returns to browser without executing | Server → Browser |
 | **ERC-8128** | Signs HTTP request with wallet identity (Signature, Signature-Input, Content-Digest headers) | Browser (@slicekit/erc8128) |
