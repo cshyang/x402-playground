@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { x402Fetch, type PaymentStep } from "@/lib/x402-client";
@@ -31,11 +31,28 @@ export function ChatPanel({
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wallet = useWallet();
+  const walletBalanceRef = useRef(wallet.usdcBalance);
+  walletBalanceRef.current = wallet.usdcBalance;
 
   const { messages, sendMessage, status, addToolResult } = useChat({
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     transport: new DefaultChatTransport({
       api: "/api/chat",
-      body: { walletBalance: wallet.usdcBalance },
+      body: new Proxy({}, {
+        get(_, prop) {
+          if (prop === "walletBalance") return walletBalanceRef.current;
+          return undefined;
+        },
+        ownKeys() {
+          return ["walletBalance"];
+        },
+        getOwnPropertyDescriptor(_, prop) {
+          if (prop === "walletBalance") {
+            return { configurable: true, enumerable: true, value: walletBalanceRef.current };
+          }
+          return undefined;
+        },
+      }),
     }),
   });
 

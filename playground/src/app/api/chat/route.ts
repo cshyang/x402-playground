@@ -52,7 +52,11 @@ const tools = {
 };
 
 export async function POST(req: Request) {
-  const { messages, walletBalance }: { messages: UIMessage[]; walletBalance?: string } = await req.json();
+  const body = await req.json();
+  console.log("[chat] body keys:", Object.keys(body));
+  console.log("[chat] body sample:", JSON.stringify(body).slice(0, 500));
+  const messages: UIMessage[] = body.messages ?? [];
+  const walletBalance: string | undefined = body.walletBalance;
 
   const balance = walletBalance || "unknown";
   const isFunded = balance !== "unknown" && balance !== "0.00" && parseFloat(balance) > 0;
