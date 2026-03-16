@@ -33,7 +33,10 @@ export function ChatPanel({
   const wallet = useWallet();
 
   const { messages, sendMessage, status, addToolResult } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+      body: { walletBalance: wallet.usdcBalance },
+    }),
   });
 
   const isLoading = status === "submitted" || status === "streaming";
@@ -141,9 +144,9 @@ export function ChatPanel({
   };
 
   return (
-    <div className="flex h-full flex-col bg-white">
-      {/* Header */}
-      <div className="border-b-2 border-zinc-300 px-5 py-4">
+    <div className="flex h-full min-h-0 flex-col bg-white">
+      {/* Header — sticky */}
+      <div className="shrink-0 border-b-2 border-zinc-300 px-5 py-4">
         <div className="flex items-center gap-2">
           <span className="text-lg">&#9830;</span>
           <h1 className="font-mono text-sm font-bold uppercase tracking-widest text-zinc-700">

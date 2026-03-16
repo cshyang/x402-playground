@@ -52,7 +52,10 @@ const tools = {
 };
 
 export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json();
+  const { messages, walletBalance }: { messages: UIMessage[]; walletBalance?: string } = await req.json();
+
+  const balance = walletBalance || "unknown";
+  const isFunded = balance !== "unknown" && balance !== "0.00" && parseFloat(balance) > 0;
 
   const result = streamText({
     model: zai.chat("glm-4.7"),
@@ -63,6 +66,9 @@ You have 4 tools:
 - get_time (FREE): returns current time
 - square_number (PAID — $0.01 USDC): squares a number
 - random_fact (PAID — $0.005 USDC): returns a fun fact
+
+User's wallet USDC balance: $${balance}
+${!isFunded ? "WARNING: The wallet is NOT funded. If the user asks to use a paid tool, tell them they need to fund their wallet first using the \"Fund\" button on the right panel (Circle faucet, Base Sepolia network). Do NOT call paid tools when the wallet has no balance — it will fail." : ""}
 
 When using paid tools, mention that they cost money. Keep responses concise.`,
     messages: await convertToModelMessages(messages),

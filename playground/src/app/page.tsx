@@ -34,9 +34,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex h-screen flex-col md:flex-row">
+    <div className="flex h-dvh flex-col overflow-hidden md:flex-row">
       {/* Mobile tab switcher — only visible on small screens */}
-      <div className="flex border-b-2 border-zinc-300 md:hidden">
+      <div className="flex shrink-0 border-b-2 border-zinc-300 md:hidden">
         <button
           onClick={() => setMobileTab("chat")}
           className={`flex-1 py-2.5 font-mono text-[10px] font-bold uppercase tracking-widest transition-colors ${
@@ -66,7 +66,7 @@ export default function Home() {
 
       {/* Chat panel */}
       <div
-        className={`flex-1 flex-col border-zinc-300 md:flex md:w-1/2 md:border-r-2 ${
+        className={`min-h-0 flex-1 flex-col border-zinc-300 md:flex md:w-1/2 md:border-r-2 ${
           mobileTab === "chat" ? "flex" : "hidden"
         }`}
       >
@@ -75,7 +75,7 @@ export default function Home() {
 
       {/* Flow panel */}
       <div
-        className={`flex-1 flex-col md:flex md:w-1/2 ${
+        className={`min-h-0 flex-1 flex-col md:flex md:w-1/2 ${
           mobileTab === "flow" ? "flex" : "hidden"
         }`}
       >
