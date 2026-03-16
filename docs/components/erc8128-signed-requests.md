@@ -64,11 +64,41 @@ Once the server can verify WHO is calling (not just that they paid), it unlocks:
 
 | Capability | What it enables |
 |-----------|----------------|
-| **Usage tracking** | "Wallet 0xFD6F has made 342 requests this month" |
-| **Reputation** | "This wallet has a 4.7 rating on ERC-8004" — trust-aware pricing |
-| **Per-caller pricing** | "Trusted wallets pay $0.005, unknown wallets pay $0.01" |
+| **Per-caller pricing** | "Trusted wallets pay $0.005, unknown wallets pay $0.01" — decided *before* the 402 response |
+| **Reputation** | "This wallet has a 4.7 rating on ERC-8004" — trust-aware access |
+| **Usage tracking** | "Wallet 0xFD6F has made 342 requests this month" — per-caller rate limiting |
 | **Audit trail** | "Wallet 0xFD6F paid for this analysis at 2:31 PM" — provable on-chain |
 | **Access control** | "Only wallets registered on ERC-8004 can access premium endpoints" |
+
+### "But couldn't x402 just tell the server who paid?"
+
+Good question. The x402 payment signature *does* contain the payer's address — the facilitator runs `ecrecover` on it and knows exactly who signed. So why can't the server just get that from the facilitator?
+
+Because the server never decodes the payment signature itself. It sends the raw payload to the facilitator and gets back `{ isValid: true, txHash: "0x..." }` — a go/no-go, not a decoded identity. The facilitator knows who paid. Your server doesn't.
+
+Could the protocol be designed to also return the address? Absolutely. But ERC-8128 is still valuable for three reasons:
+
+**1. Identity before payment.** ERC-8128 verification is instant (just math). The facilitator call involves a network round-trip + on-chain settlement. If you want per-caller pricing — "trusted agents pay $0.005, unknown agents pay $0.01" — you need to know who's calling *before* you issue the 402 response.
+
+```
+x402 only:     Request → 402 (same price for all) → pay → facilitator → identity
+                                                                         (too late)
+
+ERC-8128 + x402: Request → verify identity (instant) → 402 (custom price) → pay
+```
+
+**2. The facilitator becomes a trust bottleneck.** If your server relies on the facilitator to tell it who the caller is, you're trusting the facilitator for identity — not just payment settlement. ERC-8128 lets your server verify identity directly with `ecrecover`. No third party involved.
+
+**3. Identity without payment.** Not every endpoint is paid. If you want to know who's calling a free-tier endpoint — for rate limiting, analytics, or reputation lookup — there's no x402 payment to extract identity from. ERC-8128 works on any request, paid or free. But this only works if the client cooperates by signing. The server can't force unsigned callers to identify themselves — it can only refuse to serve them.
+
+| Scenario | x402 | ERC-8128 | Server knows |
+|----------|------|----------|-------------|
+| Open free API | No | No | Nothing |
+| Free but identified | No | Yes | Who (client opts in) |
+| Paid anonymous | Yes | No | Someone paid (not who) |
+| Paid + identified | Yes | Yes | Who paid |
+
+Our playground uses the bottom row. For a playground with flat pricing, ERC-8128 is educational but not strictly necessary — x402 alone would work. ERC-8128 becomes essential when you need identity *independent of* or *before* payment.
 
 ### How it compares to traditional authentication
 
