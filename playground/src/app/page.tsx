@@ -13,6 +13,7 @@ export interface PaymentEvent {
   result?: unknown;
   error?: string;
   txHash?: string;
+  timestamp: number;
 }
 
 export default function Home() {

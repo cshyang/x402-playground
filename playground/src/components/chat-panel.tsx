@@ -4,24 +4,15 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { x402Fetch, type PaymentStep } from "@/lib/x402-client";
+import { x402Fetch } from "@/lib/x402-client";
 import { useWallet } from "@/lib/use-wallet";
+import type { PaymentEvent } from "@/app/page";
 
 // Map paid tool names to their API endpoints
 const PAID_TOOL_ENDPOINTS: Record<string, (input: Record<string, unknown>) => string> = {
   square_number: (input) => `/api/tools/square?n=${input?.n ?? 0}`,
   random_fact: () => `/api/tools/fact`,
 };
-
-interface PaymentEvent {
-  toolCallId: string;
-  toolName: string;
-  input: Record<string, unknown>;
-  steps: PaymentStep[];
-  result?: unknown;
-  error?: string;
-  txHash?: string;
-}
 
 export function ChatPanel({
   onPayment,
@@ -109,6 +100,7 @@ export function ChatPanel({
               toolName,
               input: toolInput,
               steps: [],
+              timestamp: Date.now(),
             };
 
             const result = await x402Fetch(
